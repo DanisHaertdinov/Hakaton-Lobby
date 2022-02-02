@@ -1,18 +1,18 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = {
-  name: string
-}
+  name: string;
+};
 
-const users = [{ name: 'John Doe' }]
+const users = [{ name: "John Doe" }];
 
 export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data[]>
 ) {
-  if (req.method === 'POST') {
-    users.push({name: req.body})
+  if (req.method === "POST") {
+    users.push({ name: req.body });
   }
-  res.status(200).json(users)
+  res.status(200).json(users);
 }
