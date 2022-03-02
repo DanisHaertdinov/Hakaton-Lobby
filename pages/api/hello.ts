@@ -1,17 +1,24 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
+import { MAX_USERS } from "../const";
+import { User } from "../types";
 
-type Data = {
-  name: string;
+type Error = {
+  error: string;
 };
 
-const users = [{ name: "John Doe" }];
+const users: User[] = [];
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data[]>
+  res: NextApiResponse<User[] | Error>
 ) {
   if (req.method === "POST") {
+    if (users.length > MAX_USERS) {
+      return res
+        .status(200)
+        .json({ error: "maximum number of users exceeded" });
+    }
     users.push({ name: req.body });
   }
   res.status(200).json(users);
