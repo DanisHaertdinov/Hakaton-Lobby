@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
 import { List, Typography, Input, Button } from "antd";
 import { useState, ChangeEvent } from "react";
-import { MAX_USERS } from "./const";
-import { User } from "./types";
+import { MAX_USERS } from "../src/const";
+import { User } from "../src/types";
 
 interface props {
   users: User[];

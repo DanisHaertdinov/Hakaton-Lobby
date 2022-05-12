@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { MAX_USERS } from "../const";
-import { User } from "../types";
+import { MAX_USERS } from "../../src/const";
+import { User } from "../../src/types";
 
 type Error = {
   error: string;
