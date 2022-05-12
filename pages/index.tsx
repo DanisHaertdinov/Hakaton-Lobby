@@ -8,12 +8,16 @@ interface props {
   users: User[];
 }
 
+const DOMAIN = process.env.NODE_ENV
+  ? "http://localhost:3000"
+  : process.env.VERCEL_URL;
+
 const Home: NextPage<props> = ({ users }: props) => {
   const [nickname, setNickname] = useState<string>("");
   const [usersData, setUsersData] = useState<User[]>(users);
 
   const handleButtonClick = async (nickname: string): Promise<void> => {
-    const responseJSON = await fetch("http://localhost:3000/api/hello", {
+    const responseJSON = await fetch(`/api/hello`, {
       method: "POST",
       body: JSON.stringify(nickname),
     });
@@ -71,7 +75,7 @@ const Home: NextPage<props> = ({ users }: props) => {
 };
 
 export async function getServerSideProps() {
-  const res = await fetch(`http://localhost:3000/api/hello`);
+  const res = await fetch(`${DOMAIN}/api/hello`);
   const users = await res.json();
 
   return { props: { users } };
