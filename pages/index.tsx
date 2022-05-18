@@ -73,6 +73,8 @@ const Home: NextPage<props> = ({ users }: props) => {
 };
 
 export async function getServerSideProps() {
+  console.error(process.env.VERCEL_URL);
+  console.error(process.env.SITE_URL);
   const res = await fetch(`${DOMAIN}/api/hello`);
   const users = await res.json();
   console.error(process.env.VERCEL_URL);
