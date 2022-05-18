@@ -8,9 +8,7 @@ interface props {
   users: User[];
 }
 
-const DOMAIN = process.env.NODE_ENV
-  ? "http://localhost:3000"
-  : process.env.VERCEL_URL;
+const DOMAIN = process.env.VERCEL_URL || "http://localhost:3000";
 
 const Home: NextPage<props> = ({ users }: props) => {
   const [nickname, setNickname] = useState<string>("");
