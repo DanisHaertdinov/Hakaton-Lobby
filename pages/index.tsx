@@ -8,7 +8,7 @@ interface props {
   users: User[];
 }
 
-const DOMAIN = process.env.VERCEL_URL || "http://localhost:3000";
+const DOMAIN = process.env.SITE_URL || "http://localhost:3000";
 
 const Home: NextPage<props> = ({ users }: props) => {
   const [nickname, setNickname] = useState<string>("");
@@ -75,6 +75,8 @@ const Home: NextPage<props> = ({ users }: props) => {
 export async function getServerSideProps() {
   const res = await fetch(`${DOMAIN}/api/hello`);
   const users = await res.json();
+  console.error(process.env.VERCEL_URL);
+  console.error(process.env.SITE_URL);
 
   return { props: { users } };
 }
