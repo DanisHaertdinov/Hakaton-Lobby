@@ -2,4 +2,9 @@ type User = {
   name: string;
 };
 
-export type { User };
+type UsersResponse = {
+  users: User[];
+  userNickname?: string;
+};
+
+export type { User, UsersResponse };

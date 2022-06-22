@@ -1,7 +1,9 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
+import { serialize } from "cookie";
+
 import { MAX_USERS } from "../../src/const";
-import { User } from "../../src/types";
+import { User, UsersResponse } from "../../src/types";
+
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type Error = {
   error: string;
@@ -11,8 +13,12 @@ const users: User[] = [];
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<User[] | Error>
+  res: NextApiResponse<UsersResponse | Error>
 ) {
+  const response: UsersResponse = {
+    users,
+  };
+
   if (req.method === "POST") {
     if (users.length > MAX_USERS) {
       return res
@@ -20,6 +26,12 @@ export default function handler(
         .json({ error: "maximum number of users exceeded" });
     }
     users.push({ name: req.body });
+    response.userNickname = req.body;
+    res.setHeader(
+      "Set-Cookie",
+      serialize("nickname", `${req.body}`, { path: "/" })
+    );
   }
-  res.status(200).json(users);
+
+  return res.status(200).json(response);
 }
