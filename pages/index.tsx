@@ -1,24 +1,26 @@
-import type { NextPage } from "next";
 import { List, Typography, Input, Button } from "antd";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
+
 import { MAX_USERS } from "../src/const";
 import { User, UsersResponse } from "../src/types";
-import type { NextApiRequest } from "next";
 
-interface props {
+import type { NextPage, NextApiRequest } from "next";
+
+interface HomeProps {
   users: User[];
   userNickname: string;
 }
 
 const DOMAIN = process.env.VERCEL_URL || "localhost:3000";
 
-const Home: NextPage<props> = ({ userNickname, users }: props) => {
+const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
   const [nickname, setNickname] = useState<string>(userNickname);
   const [usersData, setUsersData] = useState<User[]>(users);
-  const roomInput = useRef<Input>(null);
+  const [isInputEmpty, setisInputEmpty] = useState<boolean>(true);
+  const nicknameInput = useRef<Input>(null);
 
-  const handleButtonClick = async (): Promise<void> => {
-    const newNickname = roomInput.current?.input.value;
+  const handleButtonClick = useCallback(async (): Promise<void> => {
+    const newNickname = nicknameInput.current?.input.value;
     const responseJSON = await fetch(`/api/hello`, {
       method: "POST",
       body: JSON.stringify(newNickname),
@@ -32,16 +34,21 @@ const Home: NextPage<props> = ({ userNickname, users }: props) => {
 
     setUsersData(response.users);
     setNickname(response.userNickname);
-  };
+  }, []);
+
+  const handleInputChange = useCallback(() => {
+    const isEmpty = !nicknameInput.current?.input.value;
+    setisInputEmpty(isEmpty);
+  }, []);
 
   const renderJoinButton = () => {
     return (
       <Button
         value={nickname}
         // TODO: disable button if input is empty
-        // disabled={!nickname}
+        disabled={isInputEmpty}
         type="primary"
-        onClick={() => handleButtonClick()}
+        onClick={handleButtonClick}
       >
         Join to lobby
       </Button>
@@ -51,7 +58,11 @@ const Home: NextPage<props> = ({ userNickname, users }: props) => {
   const renderRoomFooter = () => {
     return (
       <Input.Group compact style={{ display: "flex" }}>
-        <Input ref={roomInput} placeholder="enter nickname" />
+        <Input
+          ref={nicknameInput}
+          placeholder="enter nickname"
+          onChange={handleInputChange}
+        />
         {usersData.length < MAX_USERS ? renderJoinButton() : ""}
       </Input.Group>
     );

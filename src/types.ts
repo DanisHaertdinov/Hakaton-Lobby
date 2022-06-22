@@ -8,4 +8,3 @@ type UsersResponse = {
 };
 
 export type { User, UsersResponse };
-// Check vercel deploy

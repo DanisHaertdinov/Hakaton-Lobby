@@ -1,7 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { serialize } from "cookie";
+
 import { MAX_USERS } from "../../src/const";
 import { User, UsersResponse } from "../../src/types";
-import { serialize } from "cookie";
+
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type Error = {
   error: string;
@@ -14,7 +16,7 @@ export default function handler(
   res: NextApiResponse<UsersResponse | Error>
 ) {
   const response: UsersResponse = {
-    users: users,
+    users,
   };
 
   if (req.method === "POST") {
