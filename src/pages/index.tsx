@@ -1,8 +1,8 @@
 import { List, Typography, Input, Button } from "antd";
 import { useState, useRef, useCallback } from "react";
 
-import { MAX_USERS } from "../src/const";
-import { User, UsersResponse } from "../src/types";
+import { MAX_USERS } from "../const";
+import { User, UsersResponse } from "../types";
 
 import type { NextPage, NextApiRequest } from "next";
 
