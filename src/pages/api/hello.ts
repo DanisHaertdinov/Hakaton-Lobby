@@ -1,7 +1,7 @@
 import { serialize } from "cookie";
 
-import { MAX_USERS } from "../../src/const";
-import { User, UsersResponse } from "../../src/types";
+import { MAX_USERS } from "../../const";
+import { User, UsersResponse } from "../../types";
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
