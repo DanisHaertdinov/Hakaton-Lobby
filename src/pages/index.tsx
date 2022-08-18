@@ -3,6 +3,7 @@ import { useState, useRef, useCallback } from "react";
 
 import { MAX_USERS } from "../const";
 import { User, UsersResponse } from "../types";
+import {Iframe} from "../components/Iframe/Iframe";
 
 import type { NextPage, NextApiRequest } from "next";
 
@@ -69,7 +70,8 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
   };
 
   return (
-    <List
+    <div>
+      <List
       locale={{ emptyText: "empty" }}
       header={<div>Lobby</div>}
       footer={!nickname ? renderRoomFooter() : ""}
@@ -83,6 +85,8 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
         </List.Item>
       )}
     />
+      <Iframe height={'520px'} width={'100%'} src={'https://next-test-rho-lake.vercel.app/'}/>
+    </div>
   );
 };
 
