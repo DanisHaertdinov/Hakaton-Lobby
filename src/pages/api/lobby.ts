@@ -9,7 +9,7 @@ type Error = {
   error: string;
 };
 
-const users: User[] = [];
+let users: User[] = [];
 
 export default function handler(
   req: NextApiRequest,
@@ -20,17 +20,30 @@ export default function handler(
   };
 
   if (req.method === "POST") {
-    if (users.length > MAX_USERS) {
+    if (users.length >= MAX_USERS) {
       return res
         .status(200)
-        .json({ error: "maximum number of users exceeded" });
+        .json({ error: "Maximum number of users exceeded" });
     }
+
+    if (users.some(({ name }) => name === req.body)) {
+      return res.status(200).json({ error: "Nickname already in use" });
+    }
+
     users.push({ name: req.body });
     response.userNickname = req.body;
+
     res.setHeader(
       "Set-Cookie",
       serialize("nickname", `${req.body}`, { path: "/" })
     );
+  }
+
+  if (req.method === "DELETE") {
+    users = users.filter(({ name }) => name === req.body);
+    response.users = users;
+
+    res.setHeader("Set-Cookie", serialize("nickname", ``, { path: "/" }));
   }
 
   return res.status(200).json(response);
