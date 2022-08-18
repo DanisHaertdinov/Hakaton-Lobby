@@ -3,7 +3,7 @@ import { useState, useRef, useCallback } from "react";
 
 import { MAX_USERS } from "../const";
 import { User, UsersResponse } from "../types";
-import {Iframe} from "../components/Iframe/Iframe";
+import { Iframe } from "../components/Iframe/Iframe";
 
 import type { NextPage, NextApiRequest } from "next";
 
@@ -11,7 +11,7 @@ interface HomeProps {
   users: User[];
   userNickname: string;
 }
-
+const IFRAME_URL = "https://next-test-rho-lake.vercel.app/";
 const DOMAIN = process.env.VERCEL_URL || "localhost:3000";
 
 const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
@@ -28,6 +28,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
     });
 
     const response = await responseJSON.json();
+
     if (response.error) {
       console.log(response.error);
       return;
@@ -70,23 +71,23 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
   };
 
   return (
-    <div>
+    <>
       <List
-      locale={{ emptyText: "empty" }}
-      header={<div>Lobby</div>}
-      footer={!nickname ? renderRoomFooter() : ""}
-      bordered
-      dataSource={usersData}
-      renderItem={(user) => (
-        <List.Item>
-          <Typography.Text mark>
-            {user.name === nickname ? `${user.name}(you)` : user.name}
-          </Typography.Text>
-        </List.Item>
-      )}
-    />
-      <Iframe height={'520px'} width={'100%'} src={'https://next-test-rho-lake.vercel.app/'}/>
-    </div>
+        locale={{ emptyText: "empty" }}
+        header={<div>Lobby</div>}
+        footer={!nickname ? renderRoomFooter() : ""}
+        bordered
+        dataSource={usersData}
+        renderItem={(user) => (
+          <List.Item>
+            <Typography.Text mark>
+              {user.name === nickname ? `${user.name}(you)` : user.name}
+            </Typography.Text>
+          </List.Item>
+        )}
+      />
+      <Iframe height={"520px"} width={"100%"} src={IFRAME_URL} />
+    </>
   );
 };
 
