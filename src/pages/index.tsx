@@ -1,5 +1,6 @@
 import { List, Typography, Input, Button } from "antd";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, ReactElement } from "react";
+import { CloseOutlined } from "@ant-design/icons";
 
 import { MAX_USERS } from "../const";
 import { User, UsersResponse } from "../types";
@@ -22,7 +23,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
 
   const handleButtonClick = useCallback(async (): Promise<void> => {
     const newNickname = nicknameInput.current?.input.value;
-    const responseJSON = await fetch(`/api/hello`, {
+    const responseJSON = await fetch(`/api/lobby`, {
       method: "POST",
       body: JSON.stringify(newNickname),
     });
@@ -30,7 +31,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
     const response = await responseJSON.json();
 
     if (response.error) {
-      console.log(response.error);
+      alert(response.error);
       return;
     }
 
@@ -43,11 +44,26 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
     setisInputEmpty(isEmpty);
   }, []);
 
+  const handleOutButtonClick = useCallback(async () => {
+    const responseJSON = await fetch(`/api/lobby`, {
+      method: "DELETE",
+      body: JSON.stringify(nickname),
+    });
+
+    const response = await responseJSON.json();
+    if (response.error) {
+      alert(response.error);
+      return;
+    }
+
+    setUsersData(response.users);
+    setNickname("");
+  }, [nickname]);
+
   const renderJoinButton = () => {
     return (
       <Button
         value={nickname}
-        // TODO: disable button if input is empty
         disabled={isInputEmpty}
         type="primary"
         onClick={handleButtonClick}
@@ -70,6 +86,23 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
     );
   };
 
+  const renderUserRow = ({ name }: User): ReactElement => {
+    const isCurrentUser = name === nickname;
+
+    return (
+      <List.Item>
+        <Typography.Text mark>
+          {isCurrentUser ? `${name}(you)` : name}
+        </Typography.Text>
+        {isCurrentUser ? (
+          <Button type="primary" danger onClick={handleOutButtonClick}>
+            <CloseOutlined />
+          </Button>
+        ) : null}
+      </List.Item>
+    );
+  };
+
   return (
     <>
       <List
@@ -78,13 +111,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
         footer={!nickname ? renderRoomFooter() : ""}
         bordered
         dataSource={usersData}
-        renderItem={(user) => (
-          <List.Item>
-            <Typography.Text mark>
-              {user.name === nickname ? `${user.name}(you)` : user.name}
-            </Typography.Text>
-          </List.Item>
-        )}
+        renderItem={(user) => renderUserRow(user)}
       />
       <Iframe height={"520px"} width={"100%"} src={IFRAME_URL} />
     </>
@@ -92,7 +119,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
 };
 
 export async function getServerSideProps({ req }: { req: NextApiRequest }) {
-  const res = await fetch(`http://${DOMAIN}/api/hello`);
+  const res = await fetch(`http://${DOMAIN}/api/lobby`);
   const usersResponse: UsersResponse = await res.json();
   const { users } = usersResponse;
 
