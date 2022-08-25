@@ -20,27 +20,32 @@ export default function handler(
   };
 
   if (req.method === "POST") {
+    const userName = JSON.parse(req.body);
+
     if (users.length >= MAX_USERS) {
       return res
         .status(200)
         .json({ error: "Maximum number of users exceeded" });
     }
 
-    if (users.some(({ name }) => name === req.body)) {
+    if (users.some(({ name }) => name === userName)) {
       return res.status(200).json({ error: "Nickname already in use" });
     }
 
-    users.push({ name: req.body });
-    response.userNickname = req.body;
+    users.push({ name: userName });
+    response.userNickname = userName;
 
     res.setHeader(
       "Set-Cookie",
-      serialize("nickname", `${req.body}`, { path: "/" })
+      serialize("nickname", `${userName}`, { path: "/" })
     );
   }
 
   if (req.method === "DELETE") {
-    users = users.filter(({ name }) => name === req.body);
+    const userName = JSON.parse(req.body);
+    console.log(userName);
+    console.log(users);
+    users = users.filter(({ name }) => name !== userName);
     response.users = users;
 
     res.setHeader("Set-Cookie", serialize("nickname", ``, { path: "/" }));

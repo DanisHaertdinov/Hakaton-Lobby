@@ -56,7 +56,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users }: HomeProps) => {
 
     setUsersData(response.users);
     setNickname("");
-  }, []);
+  }, [nickname]);
 
   const renderJoinButton = () => {
     return (
