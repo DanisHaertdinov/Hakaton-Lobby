@@ -20,6 +20,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
   const [usersData, setUsersData] = useState<User[]>(users);
   const [isInputEmpty, setisInputEmpty] = useState<boolean>(true);
   const [repUrl, setRepUrl] = useState<string>(url);
+  const [isPending, setIsPending] = useState<boolean>(false);
   const nicknameInput = useRef<Input>(null);
 
   const handleButtonClick = useCallback(async (): Promise<void> => {
@@ -62,12 +63,14 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
   }, [nickname]);
 
   const handleStartButtonCLick = useCallback(async () => {
+    setIsPending(true);
     const responseJSON = await fetch(`/api/repo`, {
       method: "POST",
     });
 
     const response = await responseJSON.json();
     setRepUrl(response.url);
+    setIsPending(false);
   }, []);
 
   const handleResetButtonClick = async () => {
@@ -139,7 +142,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
         block
         size={"large"}
         style={{ background: "green", borderColor: "green", color: "white" }}
-        disabled={!!url}
+        disabled={!!url || isPending}
       >
         Start
       </Button>
