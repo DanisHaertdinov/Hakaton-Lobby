@@ -7,4 +7,8 @@ type UsersResponse = {
   userNickname?: string;
 };
 
-export type { User, UsersResponse };
+type RepoResponse = {
+  url: string;
+};
+
+export type { User, UsersResponse, RepoResponse };
