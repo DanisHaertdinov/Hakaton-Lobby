@@ -14,8 +14,8 @@ type VercelProject = {
 
 const nanoid = customAlphabet("1234567890", 7);
 
-const gitHubToken = "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";
-const vercelToken = "1HTFQ0AsuD1HcBBYh9jjb6zu";
+const gitHubToken = process.env.HACK_LOBBY_GITHUB_TOKEN;
+const vercelToken = process.env.HACK_LOBBY_VERCEL_TOKEN;
 const octokit = new Octokit({
   auth: gitHubToken,
 });
@@ -79,6 +79,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<RepoResponse | Error>
 ) {
+  console.log(gitHubToken);
+
   if (req.method === "DELETE") {
     cacheUrl = "";
     return res.status(200).json({ url: "" });
