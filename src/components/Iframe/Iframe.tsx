@@ -5,5 +5,5 @@ interface IframeProps {
 }
 
 export const Iframe = ({ width, height, src }: IframeProps) => {
-  return <iframe width={width} height={height} src={src} />;
+  return <iframe width={width} height={height} src={`https://${src}`} />;
 };

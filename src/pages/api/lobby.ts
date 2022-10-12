@@ -20,7 +20,7 @@ export default function handler(
   };
 
   if (req.method === "POST") {
-    const userName = JSON.parse(req.body);
+    const { userName } = JSON.parse(req.body);
 
     if (users.length >= MAX_USERS) {
       return res
@@ -42,9 +42,12 @@ export default function handler(
   }
 
   if (req.method === "DELETE") {
-    const userName = JSON.parse(req.body);
-    console.log(userName);
-    console.log(users);
+    const { reset } = JSON.parse(req.body);
+
+    if (reset) {
+      users = [];
+    }
+    const { userName } = JSON.parse(req.body);
     users = users.filter(({ name }) => name !== userName);
     response.users = users;
 
