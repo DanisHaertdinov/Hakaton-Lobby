@@ -162,6 +162,8 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
         prejoinPageEnabled: false,
       },
     };
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const api = new JitsiMeetExternalAPI(domain, options);
     api.executeCommand("displayName", "New Nicksdname");
   };
