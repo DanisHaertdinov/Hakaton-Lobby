@@ -1,6 +1,7 @@
 import { List, Typography, Input, Button } from "antd";
 import { useState, useRef, useCallback, ReactElement } from "react";
 import { CloseOutlined } from "@ant-design/icons";
+import Script from "next/script";
 
 import { MAX_USERS } from "../const";
 import { User, UsersResponse, RepoResponse } from "../types";
@@ -22,6 +23,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
   const [repUrl, setRepUrl] = useState<string>(url);
   const [isPending, setIsPending] = useState<boolean>(false);
   const nicknameInput = useRef<Input>(null);
+  const jitsi = useRef<HTMLDivElement>(null);
 
   const handleButtonClick = useCallback(async (): Promise<void> => {
     const newNickname = nicknameInput.current?.input.value;
@@ -31,7 +33,6 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
     });
 
     const response = await responseJSON.json();
-
     if (response.error) {
       alert(response.error);
       return;
@@ -149,8 +150,29 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
     );
   };
 
+  const handeJitsiLoad = () => {
+    const domain = "meet.jit.si";
+    const options = {
+      roomName: "JitsiMeetAPIE67xample",
+      width: 750,
+      height: 750,
+      parentNode: jitsi.current,
+      lang: "ru",
+      configOverwrite: {
+        prejoinPageEnabled: false,
+      },
+    };
+    const api = new JitsiMeetExternalAPI(domain, options);
+    api.executeCommand("displayName", "New Nicksdname");
+  };
+
   return (
     <>
+      <Script
+        onLoad={handeJitsiLoad}
+        src="https://meet.jit.si/external_api.js"
+      />
+      <div ref={jitsi}></div>
       <Button onClick={handleResetButtonClick} danger={true}>
         Reset
       </Button>
@@ -163,6 +185,19 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
         renderItem={(user) => renderUserRow(user)}
       />
       {repUrl ? <Iframe height={"520px"} width={"100%"} src={repUrl} /> : null}
+      {/* <div id="meet"></div>*/}
+      {/* <script src='https://meet.jit.si/external_api.js'></script>*/}
+      {/* <script>*/}
+      {/*  const domain = 'meet.jit.si';*/}
+      {/*  const options = {*/}
+      {/*  roomName: 'JitsiMeetAPIExample',*/}
+      {/*  width: 700,*/}
+      {/*  height: 700,*/}
+      {/*  parentNode: document.querySelector('#meet'),*/}
+      {/*  lang: 'de'*/}
+      {/* };*/}
+      {/*  const api = new JitsiMeetExternalAPI(domain, options);*/}
+      {/* </script>*/}
     </>
   );
 };
