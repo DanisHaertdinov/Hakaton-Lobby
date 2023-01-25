@@ -79,8 +79,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<RepoResponse | Error>
 ) {
-  console.log(gitHubToken);
-
   if (req.method === "DELETE") {
     cacheUrl = "";
     return res.status(200).json({ url: "" });
@@ -108,9 +106,21 @@ export default async function handler(
       link: { repoId, type },
     } = await createVercelProj({ name, repo });
 
+    const vercelDeployResponse = await deployVercelProj({
+      name: projName,
+      repoId,
+      type,
+      ref,
+    });
+
+    if (!vercelDeployResponse.alias) {
+      console.log(vercelDeployResponse);
+      return;
+    }
+
     const {
       alias: [url],
-    } = await deployVercelProj({ name: projName, repoId, type, ref });
+    } = vercelDeployResponse;
 
     const response = { url };
     cacheUrl = url;

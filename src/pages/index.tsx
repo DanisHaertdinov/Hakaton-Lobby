@@ -137,6 +137,10 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
   };
 
   const renderStartButton = () => {
+    if (repUrl) {
+      return null;
+    }
+
     return (
       <Button
         onClick={handleStartButtonCLick}
@@ -154,8 +158,8 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
     const domain = "meet.jit.si";
     const options = {
       roomName: "JitsiMeetAPIE67xample",
-      width: 750,
-      height: 750,
+      width: 720,
+      height: 420,
       parentNode: jitsi.current,
       lang: "ru",
       configOverwrite: {
@@ -165,42 +169,37 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const api = new JitsiMeetExternalAPI(domain, options);
-    api.executeCommand("displayName", "New Nicksdname");
+    api.executeCommand("displayName", nickname);
   };
 
   return (
-    <>
-      <Script
-        onLoad={handeJitsiLoad}
-        src="https://meet.jit.si/external_api.js"
-      />
-      <div ref={jitsi}></div>
+    <main>
+      <div className={repUrl ? "lobby" : ""}>
+        {repUrl ? (
+          <>
+            <Script
+              onLoad={handeJitsiLoad}
+              src="https://meet.jit.si/external_api.js"
+            />
+            <div className={"jitsi"} ref={jitsi}></div>
+          </>
+        ) : null}
+
+        <List
+          locale={{ emptyText: "empty" }}
+          header={<div>Lobby</div>}
+          footer={!nickname ? renderRoomFooter() : renderStartButton()}
+          bordered
+          dataSource={usersData}
+          renderItem={(user) => renderUserRow(user)}
+          className={"lobby-list"}
+        />
+      </div>
+      {repUrl ? <Iframe height={"520px"} width={"100%"} src={repUrl} /> : null}
       <Button onClick={handleResetButtonClick} danger={true}>
         Reset
       </Button>
-      <List
-        locale={{ emptyText: "empty" }}
-        header={<div>Lobby</div>}
-        footer={!nickname ? renderRoomFooter() : renderStartButton()}
-        bordered
-        dataSource={usersData}
-        renderItem={(user) => renderUserRow(user)}
-      />
-      {repUrl ? <Iframe height={"520px"} width={"100%"} src={repUrl} /> : null}
-      {/* <div id="meet"></div>*/}
-      {/* <script src='https://meet.jit.si/external_api.js'></script>*/}
-      {/* <script>*/}
-      {/*  const domain = 'meet.jit.si';*/}
-      {/*  const options = {*/}
-      {/*  roomName: 'JitsiMeetAPIExample',*/}
-      {/*  width: 700,*/}
-      {/*  height: 700,*/}
-      {/*  parentNode: document.querySelector('#meet'),*/}
-      {/*  lang: 'de'*/}
-      {/* };*/}
-      {/*  const api = new JitsiMeetExternalAPI(domain, options);*/}
-      {/* </script>*/}
-    </>
+    </main>
   );
 };
 
