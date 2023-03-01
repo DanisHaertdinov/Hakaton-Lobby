@@ -1,6 +1,7 @@
 import { List, Typography, Input, Button } from "antd";
 import { useState, useRef, useCallback, ReactElement } from "react";
 import { CloseOutlined } from "@ant-design/icons";
+import Script from "next/script";
 
 import { MAX_USERS } from "../const";
 import { User, UsersResponse, RepoResponse } from "../types";
@@ -12,16 +13,23 @@ interface HomeProps {
   users: User[];
   userNickname: string;
   url: string;
+  lobbyName: string;
 }
 const DOMAIN = process.env.VERCEL_URL || "localhost:3000";
 
-const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
+const Home: NextPage<HomeProps> = ({
+  userNickname,
+  users,
+  url,
+  lobbyName,
+}: HomeProps) => {
   const [nickname, setNickname] = useState<string>(userNickname);
   const [usersData, setUsersData] = useState<User[]>(users);
   const [isInputEmpty, setisInputEmpty] = useState<boolean>(true);
   const [repUrl, setRepUrl] = useState<string>(url);
   const [isPending, setIsPending] = useState<boolean>(false);
   const nicknameInput = useRef<Input>(null);
+  const jitsi = useRef<HTMLDivElement>(null);
 
   const handleButtonClick = useCallback(async (): Promise<void> => {
     const newNickname = nicknameInput.current?.input.value;
@@ -31,7 +39,6 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
     });
 
     const response = await responseJSON.json();
-
     if (response.error) {
       alert(response.error);
       return;
@@ -69,7 +76,13 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
     });
 
     const response = await responseJSON.json();
-    setRepUrl(response.url);
+
+    if (response.error) {
+      alert(response.error);
+    } else {
+      setRepUrl(response.url);
+    }
+
     setIsPending(false);
   }, []);
 
@@ -136,6 +149,10 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
   };
 
   const renderStartButton = () => {
+    if (repUrl) {
+      return null;
+    }
+
     return (
       <Button
         onClick={handleStartButtonCLick}
@@ -149,38 +166,68 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
     );
   };
 
+  const handeJitsiLoad = () => {
+    const domain = "meet.jit.si";
+    const options = {
+      roomName: lobbyName,
+      width: 720,
+      height: 420,
+      parentNode: jitsi.current,
+      lang: "ru",
+      configOverwrite: {
+        prejoinPageEnabled: false,
+      },
+    };
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const api = new JitsiMeetExternalAPI(domain, options);
+    api.executeCommand("displayName", nickname);
+  };
+
   return (
-    <>
+    <main>
+      <div className={repUrl ? "lobby" : ""}>
+        {repUrl ? (
+          <>
+            <Script
+              onLoad={handeJitsiLoad}
+              src="https://meet.jit.si/external_api.js"
+            />
+            <div className={"jitsi"} ref={jitsi}></div>
+          </>
+        ) : null}
+
+        <List
+          locale={{ emptyText: "empty" }}
+          header={<div>Lobby</div>}
+          footer={!nickname ? renderRoomFooter() : renderStartButton()}
+          bordered
+          dataSource={usersData}
+          renderItem={(user) => renderUserRow(user)}
+          className={"lobby-list"}
+        />
+      </div>
+      {repUrl ? <Iframe height={"520px"} width={"100%"} src={repUrl} /> : null}
       <Button onClick={handleResetButtonClick} danger={true}>
         Reset
       </Button>
-      <List
-        locale={{ emptyText: "empty" }}
-        header={<div>Lobby</div>}
-        footer={!nickname ? renderRoomFooter() : renderStartButton()}
-        bordered
-        dataSource={usersData}
-        renderItem={(user) => renderUserRow(user)}
-      />
-      {repUrl ? <Iframe height={"520px"} width={"100%"} src={repUrl} /> : null}
-    </>
+    </main>
   );
 };
 
 export async function getServerSideProps({ req }: { req: NextApiRequest }) {
-  const [{ users }, { url }]: [UsersResponse, RepoResponse] = await Promise.all(
-    [
+  const [{ users, lobbyName }, { url }]: [UsersResponse, RepoResponse] =
+    await Promise.all([
       (await fetch(`http://${DOMAIN}/api/lobby`)).json(),
       (await fetch(`http://${DOMAIN}/api/repo`)).json(),
-    ]
-  );
+    ]);
 
   const isUserInRoom = !!users.find(
     ({ name }) => name === req.cookies.nickname
   );
   const userNickname = isUserInRoom ? req.cookies.nickname : null;
 
-  return { props: { userNickname, users, url } };
+  return { props: { userNickname, users, url, lobbyName } };
 }
 
 export default Home;
