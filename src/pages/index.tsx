@@ -13,10 +13,16 @@ interface HomeProps {
   users: User[];
   userNickname: string;
   url: string;
+  lobbyName: string;
 }
 const DOMAIN = process.env.VERCEL_URL || "localhost:3000";
 
-const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
+const Home: NextPage<HomeProps> = ({
+  userNickname,
+  users,
+  url,
+  lobbyName,
+}: HomeProps) => {
   const [nickname, setNickname] = useState<string>(userNickname);
   const [usersData, setUsersData] = useState<User[]>(users);
   const [isInputEmpty, setisInputEmpty] = useState<boolean>(true);
@@ -157,7 +163,7 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
   const handeJitsiLoad = () => {
     const domain = "meet.jit.si";
     const options = {
-      roomName: "JitsiMeetAPIE67xample",
+      roomName: lobbyName,
       width: 720,
       height: 420,
       parentNode: jitsi.current,
@@ -204,19 +210,18 @@ const Home: NextPage<HomeProps> = ({ userNickname, users, url }: HomeProps) => {
 };
 
 export async function getServerSideProps({ req }: { req: NextApiRequest }) {
-  const [{ users }, { url }]: [UsersResponse, RepoResponse] = await Promise.all(
-    [
+  const [{ users, lobbyName }, { url }]: [UsersResponse, RepoResponse] =
+    await Promise.all([
       (await fetch(`http://${DOMAIN}/api/lobby`)).json(),
       (await fetch(`http://${DOMAIN}/api/repo`)).json(),
-    ]
-  );
+    ]);
 
   const isUserInRoom = !!users.find(
     ({ name }) => name === req.cookies.nickname
   );
   const userNickname = isUserInRoom ? req.cookies.nickname : null;
 
-  return { props: { userNickname, users, url } };
+  return { props: { userNickname, users, url, lobbyName } };
 }
 
 export default Home;

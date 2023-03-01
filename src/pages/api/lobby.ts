@@ -1,4 +1,5 @@
 import { serialize } from "cookie";
+import { nanoid } from "nanoid";
 
 import { MAX_USERS } from "../../const";
 import { User, UsersResponse } from "../../types";
@@ -17,6 +18,7 @@ export default function handler(
 ) {
   const response: UsersResponse = {
     users,
+    lobbyName: `hack-lobby-${nanoid()}`,
   };
 
   if (req.method === "POST") {

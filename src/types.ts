@@ -5,6 +5,7 @@ type User = {
 type UsersResponse = {
   users: User[];
   userNickname?: string;
+  lobbyName: string;
 };
 
 type RepoResponse = {
