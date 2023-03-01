@@ -76,7 +76,13 @@ const Home: NextPage<HomeProps> = ({
     });
 
     const response = await responseJSON.json();
-    setRepUrl(response.url);
+
+    if (response.error) {
+      alert(response.error);
+    } else {
+      setRepUrl(response.url);
+    }
+
     setIsPending(false);
   }, []);
 
