@@ -1,6 +1,6 @@
-import { List, Typography, Input, Button } from "antd";
+import { List, Typography, Input, Button, Row, Avatar } from "antd";
 import { useState, useRef, useCallback, ReactElement } from "react";
-import { CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined, GithubOutlined } from "@ant-design/icons";
 import Script from "next/script";
 
 import { MAX_USERS } from "../const";
@@ -14,14 +14,17 @@ interface HomeProps {
   userNickname: string;
   url: string;
   lobbyName: string;
+  user: { name: string; avatarURL: string };
 }
 const DOMAIN = process.env.VERCEL_URL || "localhost:3000";
+const gitHubID = process.env.GITHUB_OAuth_ID;
 
 const Home: NextPage<HomeProps> = ({
   userNickname,
   users,
   url,
   lobbyName,
+  user,
 }: HomeProps) => {
   const [nickname, setNickname] = useState<string>(userNickname);
   const [usersData, setUsersData] = useState<User[]>(users);
@@ -166,6 +169,16 @@ const Home: NextPage<HomeProps> = ({
     );
   };
 
+  const renderUserBadge = () => {
+    const { avatarURL, name } = user;
+    return (
+      <>
+        <Avatar src={avatarURL} />
+        <span>{name}</span>
+      </>
+    );
+  };
+
   const handeJitsiLoad = () => {
     const domain = "meet.jit.si";
     const options = {
@@ -186,6 +199,19 @@ const Home: NextPage<HomeProps> = ({
 
   return (
     <main>
+      <Row justify="end" align="top">
+        {user ? (
+          renderUserBadge()
+        ) : (
+          <Button
+            type="link"
+            href={`https://github.com/login/oauth/authorize?client_id=${gitHubID}`}
+            size="large"
+          >
+            <GithubOutlined style={{ fontSize: "30px", color: "black" }} />
+          </Button>
+        )}
+      </Row>
       <div className={repUrl ? "lobby" : ""}>
         {repUrl ? (
           <>
@@ -222,12 +248,21 @@ export async function getServerSideProps({ req }: { req: NextApiRequest }) {
       (await fetch(`http://${DOMAIN}/api/repo`)).json(),
     ]);
 
+  const userId = req.cookies.userId;
+  let user = null;
+  if (userId) {
+    user = await (
+      await fetch(`http://${DOMAIN}/api/user/${userId}`, {
+        method: "GET",
+      })
+    ).json();
+  }
   const isUserInRoom = !!users.find(
     ({ name }) => name === req.cookies.nickname
   );
   const userNickname = isUserInRoom ? req.cookies.nickname : null;
 
-  return { props: { userNickname, users, url, lobbyName } };
+  return { props: { userNickname, users, url, lobbyName, user } };
 }
 
 export default Home;
