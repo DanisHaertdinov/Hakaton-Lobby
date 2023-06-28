@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { OAuthApp } from "@octokit/oauth-app";
 import { serialize } from "cookie";
-
 import { gitHubID, gitHubSecret } from "../../config";
 
 export default async function handler(

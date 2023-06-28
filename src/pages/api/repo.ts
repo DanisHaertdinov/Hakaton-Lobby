@@ -1,7 +1,6 @@
 import { Octokit } from "octokit";
 import { customAlphabet } from "nanoid";
 import { NextApiRequest, NextApiResponse } from "next";
-
 import { RepoData, RepoResponse, ResponseError } from "../../types";
 import { generateResponse as baseGenerateResponse } from "../../utils/api";
 import { gitHubToken, vercelToken } from "../../config";

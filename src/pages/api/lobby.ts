@@ -1,10 +1,8 @@
 import { serialize } from "cookie";
 import { nanoid } from "nanoid";
-
 import { MAX_USERS } from "../../const";
 import { ResponseError, User, UsersData, UsersResponse } from "../../types";
 import { generateResponse as basegGenerateResponse } from "../../utils/api";
-
 import type { NextApiRequest, NextApiResponse } from "next";
 
 let users: User[] = [];

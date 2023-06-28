@@ -2,13 +2,11 @@ import { List, Typography, Input, Button, Row, Avatar } from "antd";
 import { useState, useRef, useCallback, ReactElement } from "react";
 import { CloseOutlined, GithubOutlined } from "@ant-design/icons";
 import Script from "next/script";
-
 import { MAX_USERS } from "../const";
 import { User, UsersResponse, RepoResponse } from "../types";
 import { Iframe } from "../components/Iframe/Iframe";
 import { load } from "../endpoints/load";
 import { gitHubID } from "../config";
-
 import type { NextPage, NextApiRequest } from "next";
 
 interface HomeProps {
