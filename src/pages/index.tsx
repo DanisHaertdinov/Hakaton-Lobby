@@ -7,6 +7,7 @@ import { MAX_USERS } from "../const";
 import { User, UsersResponse, RepoResponse } from "../types";
 import { Iframe } from "../components/Iframe/Iframe";
 import { load } from "../endpoints/load";
+import { gitHubID } from "../config";
 
 import type { NextPage, NextApiRequest } from "next";
 
@@ -17,8 +18,6 @@ interface HomeProps {
   lobbyName: string;
   user: User;
 }
-
-const gitHubID = process.env.GITHUB_OAuth_ID;
 
 const Home: NextPage<HomeProps> = ({
   userNickname,

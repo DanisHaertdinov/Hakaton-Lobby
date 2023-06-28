@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { RepoData, RepoResponse, ResponseError } from "../../types";
 import { generateResponse as baseGenerateResponse } from "../../utils/api";
+import { gitHubToken, vercelToken } from "../../config";
 
 type VercelProject = {
   name: string;
@@ -15,8 +16,6 @@ type VercelProject = {
 
 const nanoid = customAlphabet("1234567890", 7);
 
-const gitHubToken = process.env.HACK_LOBBY_GITHUB_TOKEN;
-const vercelToken = process.env.HACK_LOBBY_VERCEL_TOKEN;
 const octokit = new Octokit({
   auth: gitHubToken,
 });

@@ -1,6 +1,6 @@
-type Methods = "GET" | "POST" | "PUT" | "DELETE";
+import { DOMAIN } from "../config";
 
-const DOMAIN = process.env.VERCEL_URL || "localhost:3000";
+type Methods = "GET" | "POST" | "PUT" | "DELETE";
 
 type RequestParams =
   | {
