@@ -2,21 +2,37 @@ import { serialize } from "cookie";
 import { nanoid } from "nanoid";
 
 import { MAX_USERS } from "../../const";
-import { User, UsersResponse } from "../../types";
+import { ResponseError, User, UsersData, UsersResponse } from "../../types";
+import { generateResponse as basegGenerateResponse } from "../../utils/api";
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
-type Error = {
-  error: string;
-};
-
 let users: User[] = [];
+
+const generateResponse = ({
+  data,
+  error,
+}: {
+  data?: UsersData;
+  error?: ResponseError;
+}): UsersResponse => {
+  const defaultData: UsersData = {
+    users: [],
+    lobbyName: "",
+  };
+  const externalData = data ?? {};
+
+  return basegGenerateResponse<UsersData>(
+    { ...defaultData, ...externalData },
+    error
+  );
+};
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<UsersResponse | Error>
+  res: NextApiResponse<UsersResponse>
 ) {
-  const response: UsersResponse = {
+  const data: UsersData = {
     users,
     lobbyName: `hack-lobby-${nanoid()}`,
   };
@@ -25,17 +41,25 @@ export default function handler(
     const { userName } = JSON.parse(req.body);
 
     if (users.length >= MAX_USERS) {
-      return res
-        .status(200)
-        .json({ error: "Maximum number of users exceeded" });
+      return res.status(200).json(
+        generateResponse({
+          error: {
+            error: "Maximum number of users exceeded",
+          },
+        })
+      );
     }
 
     if (users.some(({ name }) => name === userName)) {
-      return res.status(200).json({ error: "Nickname already in use" });
+      return res
+        .status(200)
+        .json(
+          generateResponse({ error: { error: "Nickname already in use" } })
+        );
     }
 
     users.push({ name: userName });
-    response.userNickname = userName;
+    data.userNickname = userName;
 
     res.setHeader(
       "Set-Cookie",
@@ -51,10 +75,10 @@ export default function handler(
     }
     const { userName } = JSON.parse(req.body);
     users = users.filter(({ name }) => name !== userName);
-    response.users = users;
+    data.users = users;
 
     res.setHeader("Set-Cookie", serialize("nickname", ``, { path: "/" }));
   }
 
-  return res.status(200).json(response);
+  return res.status(200).json(generateResponse({ data }));
 }

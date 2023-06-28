@@ -2,7 +2,8 @@ import { Octokit } from "octokit";
 import { customAlphabet } from "nanoid";
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { RepoResponse } from "../../types";
+import { RepoData, RepoResponse, ResponseError } from "../../types";
+import { generateResponse as baseGenerateResponse } from "../../utils/api";
 
 type VercelProject = {
   name: string;
@@ -10,10 +11,6 @@ type VercelProject = {
   type?: string;
   repoId?: number;
   ref?: string;
-};
-
-type Error = {
-  error: string;
 };
 
 const nanoid = customAlphabet("1234567890", 7);
@@ -79,19 +76,35 @@ const deployVercelProj = async ({ name, type, repoId, ref }: VercelProject) => {
   ).json();
 };
 
+const generateResponse = ({
+  data,
+  error,
+}: {
+  data?: RepoData;
+  error?: ResponseError;
+}): RepoResponse => {
+  const defaultResponse = { url: "" };
+  const externalData = data ?? {};
+
+  return baseGenerateResponse<RepoData>(
+    { ...defaultResponse, ...externalData },
+    error
+  );
+};
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<RepoResponse | Error>
+  res: NextApiResponse<RepoResponse>
 ) {
   if (req.method === "DELETE") {
     cacheUrl = "";
-    return res.status(200).json({ url: "" });
+    return res.status(200).json(generateResponse({ data: { url: "" } }));
   }
 
   if (req.method === "GET") {
     const response = { url: cacheUrl };
 
-    return res.status(200).json(response);
+    return res.status(200).json(generateResponse({ data: response }));
   }
 
   if (req.method === "POST") {
@@ -99,7 +112,7 @@ export default async function handler(
       if (cacheUrl) {
         const response = { url: cacheUrl };
 
-        return res.status(200).json(response);
+        return res.status(200).json(generateResponse({ data: response }));
       }
 
       const {
@@ -125,9 +138,15 @@ export default async function handler(
       const response = { url };
       cacheUrl = url;
 
-      return res.status(200).json(response);
+      return res.status(200).json(generateResponse({ data: response }));
     } catch (error) {
-      return res.status(200).json({ error: "Something went wrong" });
+      return res.status(200).json(
+        generateResponse({
+          error: {
+            error: "Something went wrong",
+          },
+        })
+      );
     }
   }
 }

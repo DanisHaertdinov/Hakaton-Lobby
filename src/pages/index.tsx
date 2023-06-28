@@ -6,6 +6,7 @@ import Script from "next/script";
 import { MAX_USERS } from "../const";
 import { User, UsersResponse, RepoResponse } from "../types";
 import { Iframe } from "../components/Iframe/Iframe";
+import { load } from "../endpoints/load";
 
 import type { NextPage, NextApiRequest } from "next";
 
@@ -14,9 +15,9 @@ interface HomeProps {
   userNickname: string;
   url: string;
   lobbyName: string;
-  user: { name: string; avatarURL: string };
+  user: User;
 }
-const DOMAIN = process.env.VERCEL_URL || "localhost:3000";
+
 const gitHubID = process.env.GITHUB_OAuth_ID;
 
 const Home: NextPage<HomeProps> = ({
@@ -36,19 +37,20 @@ const Home: NextPage<HomeProps> = ({
 
   const handleButtonClick = useCallback(async (): Promise<void> => {
     const newNickname = nicknameInput.current?.input.value;
-    const responseJSON = await fetch(`/api/lobby`, {
+
+    const { error, data } = await load<UsersResponse>({
+      endpoint: "/lobby",
       method: "POST",
-      body: JSON.stringify({ userName: newNickname }),
+      body: { userName: newNickname },
     });
 
-    const response = await responseJSON.json();
-    if (response.error) {
-      alert(response.error);
+    if (error) {
+      alert(error);
       return;
     }
 
-    setUsersData(response.users);
-    setNickname(response.userNickname);
+    setUsersData(data.users);
+    setNickname(data.userNickname || "");
   }, []);
 
   const handleInputChange = useCallback(() => {
@@ -57,33 +59,34 @@ const Home: NextPage<HomeProps> = ({
   }, []);
 
   const handleOutButtonClick = useCallback(async () => {
-    const responseJSON = await fetch(`/api/lobby`, {
+    const { error, data } = await load<UsersResponse>({
+      endpoint: "/lobby",
       method: "DELETE",
-      body: JSON.stringify({ userName: nickname }),
+      body: { userName: nickname },
     });
 
-    const response = await responseJSON.json();
-    if (response.error) {
-      alert(response.error);
+    if (error) {
+      alert(error);
       return;
     }
 
-    setUsersData(response.users);
+    setUsersData(data.users);
     setNickname("");
   }, [nickname]);
 
   const handleStartButtonCLick = useCallback(async () => {
     setIsPending(true);
-    const responseJSON = await fetch(`/api/repo`, {
+
+    const { data, error } = await load<RepoResponse>({
+      endpoint: "/repo",
       method: "POST",
+      body: {},
     });
 
-    const response = await responseJSON.json();
-
-    if (response.error) {
-      alert(response.error);
+    if (error) {
+      alert(error);
     } else {
-      setRepUrl(response.url);
+      setRepUrl(data.url);
     }
 
     setIsPending(false);
@@ -93,13 +96,15 @@ const Home: NextPage<HomeProps> = ({
     const reset = true;
 
     await Promise.all([
-      fetch(`/api/repo`, {
-        body: JSON.stringify({ reset }),
+      load<RepoResponse>({
+        endpoint: "/repo",
         method: "DELETE",
+        body: { reset },
       }),
-      fetch(`/api/lobby`, {
-        body: JSON.stringify({ reset }),
+      load<UsersResponse>({
+        endpoint: "/lobby",
         method: "DELETE",
+        body: { reset },
       }),
     ]);
 
@@ -242,21 +247,24 @@ const Home: NextPage<HomeProps> = ({
 };
 
 export async function getServerSideProps({ req }: { req: NextApiRequest }) {
-  const [{ users, lobbyName }, { url }]: [UsersResponse, RepoResponse] =
-    await Promise.all([
-      (await fetch(`http://${DOMAIN}/api/lobby`)).json(),
-      (await fetch(`http://${DOMAIN}/api/repo`)).json(),
-    ]);
-
   const userId = req.cookies.userId;
-  let user = null;
-  if (userId) {
-    user = await (
-      await fetch(`http://${DOMAIN}/api/user/${userId}`, {
-        method: "GET",
-      })
-    ).json();
-  }
+
+  const [
+    {
+      data: { users, lobbyName },
+    },
+    {
+      data: { url },
+    },
+    user,
+  ] = await Promise.all([
+    load<UsersResponse>({ endpoint: "/lobby" }),
+    load<RepoResponse>({ endpoint: "/repo" }),
+    userId
+      ? load<User>({ endpoint: `/user/${userId}` })
+      : Promise.resolve(null),
+  ]);
+
   const isUserInRoom = !!users.find(
     ({ name }) => name === req.cookies.nickname
   );
