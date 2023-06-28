@@ -1,6 +1,5 @@
 import { createRouter } from "next-connect";
 import { NextApiRequest, NextApiResponse } from "next";
-
 import { getUserById } from "../../../utils/user";
 
 const router = createRouter<NextApiRequest, NextApiResponse>();
