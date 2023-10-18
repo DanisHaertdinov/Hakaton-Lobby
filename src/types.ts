@@ -1,15 +1,36 @@
 type User = {
   name: string;
+  avatarURL?: string;
 };
 
-type UsersResponse = {
+type Response<T> = {
+  data: T;
+} & ResponseError;
+
+type UsersData = {
   users: User[];
   userNickname?: string;
   lobbyName: string;
 };
 
-type RepoResponse = {
+type UsersResponse = Response<UsersData>;
+
+type RepoData = {
   url: string;
 };
 
-export type { User, UsersResponse, RepoResponse };
+type RepoResponse = Response<RepoData>;
+
+type ResponseError = {
+  error?: string;
+};
+
+export type {
+  User,
+  UsersResponse,
+  RepoResponse,
+  ResponseError,
+  UsersData,
+  RepoData,
+  Response,
+};
