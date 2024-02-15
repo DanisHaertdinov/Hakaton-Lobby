@@ -1,16 +1,17 @@
 import { Octokit } from "octokit";
 
-export const getUserById = async (id: string) => {
+export const getUserByToken = async (token: string) => {
   const octokit = new Octokit({
-    auth: id,
+    auth: token,
   });
 
   const {
-    data: { login: name, avatar_url: avatarURL },
+    data: { login: name, avatar_url: avatarURL, id },
   } = await octokit.request("GET /user");
 
   return {
     name,
     avatarURL,
+    gitHubId: id
   };
 };
