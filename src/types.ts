@@ -1,6 +1,10 @@
+import { ObjectId } from "mongoose";
+
 type User = {
+  gitHubId?: number;
   name: string;
   avatarURL?: string;
+  token?: string;
 };
 
 type Response<T> = {
@@ -25,6 +29,11 @@ type ResponseError = {
   error?: string;
 };
 
+type Session = {
+  token: string;
+  userId: ObjectId;
+};
+
 export type {
   User,
   UsersResponse,
@@ -33,4 +42,5 @@ export type {
   UsersData,
   RepoData,
   Response,
+  Session,
 };
