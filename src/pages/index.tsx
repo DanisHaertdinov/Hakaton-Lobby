@@ -269,6 +269,7 @@ export async function getServerSideProps({ req }: { req: NextApiRequest }) {
   ] = await Promise.all([
     load<UsersResponse>({ endpoint: "/lobby" }),
     load<RepoResponse>({ endpoint: "/repo" }),
+    // TODO: Нужно ходит за юзером на прямую в БД вместо удаленого ендпойнта
     userId
       ? load<User>({ endpoint: `/user/${userId}` })
       : Promise.resolve(null),
