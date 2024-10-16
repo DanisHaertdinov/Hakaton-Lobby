@@ -24,6 +24,7 @@ export const load = async <T>({
 
   const url = `${DOMAIN}/api/${endpoint}`.replaceAll("//", "/");
 
+// TODO: вынести протокол в process.env.DOMAIN
   const response = await fetch(`http://${url}`, {
     ...params,
   });
