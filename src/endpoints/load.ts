@@ -21,9 +21,9 @@ export const load = async <T>({
 }: RequestParams): Promise<T> => {
   const params =
     method === "GET" ? { method } : { method, body: JSON.stringify(body) };
-
-  const url = `${DOMAIN}/api/${endpoint}`.replaceAll("//", "/");
-
+  const domain = typeof window === 'undefined' ? DOMAIN : '';
+  const url = `${domain}/api/${endpoint}`.replaceAll("//", "/");
+  
   // TODO: вынести протокол в process.env.DOMAIN
   const response = await fetch(`http://${url}`, {
     ...params,
