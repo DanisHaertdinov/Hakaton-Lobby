@@ -245,6 +245,7 @@ const Home: NextPage<HomeProps> = ({
   );
 };
 
+// TODO: вынести mongoConnect в src/services/mongo
 export const mongoConnect = async () => {
   return await mongoose
     .connect(
