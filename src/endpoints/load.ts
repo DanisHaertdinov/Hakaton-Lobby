@@ -22,11 +22,12 @@ export const load = async <T>({
   const params =
     method === "GET" ? { method } : { method, body: JSON.stringify(body) };
 
-  const response = await (
-    await fetch(`http://${DOMAIN}/api/${endpoint}`, {
-      ...params,
-    })
-  ).json();
+  const url = `${DOMAIN}/api/${endpoint}`.replaceAll("//", "/");
 
-  return response;
+  // TODO: вынести протокол в process.env.DOMAIN
+  const response = await fetch(`http://${url}`, {
+    ...params,
+  });
+
+  return response.json();
 };

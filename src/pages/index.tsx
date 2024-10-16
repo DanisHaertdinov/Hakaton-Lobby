@@ -1,13 +1,15 @@
-import { List, Typography, Input, Button, Row, Avatar } from "antd";
-import { useState, useRef, useCallback, ReactElement } from "react";
+import { Avatar, Button, Input, List, Row, Typography } from "antd";
+import { ReactElement, useCallback, useRef, useState } from "react";
 import { CloseOutlined, GithubOutlined } from "@ant-design/icons";
 import Script from "next/script";
+import mongoose from "mongoose";
 import { MAX_USERS } from "../const";
-import { User, UsersResponse, RepoResponse } from "../types";
+import { RepoResponse, User, UsersResponse } from "../types";
 import { Iframe } from "../components/Iframe/Iframe";
 import { load } from "../endpoints/load";
-import { gitHubID } from "../config";
-import type { NextPage, NextApiRequest } from "next";
+import { gitHubID, HACK_MONGO_PASS, HACK_MONGO_USER } from "../config";
+import { Session } from "./api/mongo/session/model";
+import type { NextApiRequest, NextPage } from "next";
 
 interface HomeProps {
   users: User[];
@@ -36,7 +38,7 @@ const Home: NextPage<HomeProps> = ({
     const newNickname = nicknameInput.current?.input.value;
 
     const { error, data } = await load<UsersResponse>({
-      endpoint: "/lobby",
+      endpoint: "lobby",
       method: "POST",
       body: { userName: newNickname },
     });
@@ -243,9 +245,19 @@ const Home: NextPage<HomeProps> = ({
   );
 };
 
-export async function getServerSideProps({ req }: { req: NextApiRequest }) {
-  const userId = req.cookies.userId;
+// TODO: вынести mongoConnect в src/services/mongo
+export const mongoConnect = async () => {
+  return await mongoose
+    .connect(
+      `mongodb+srv://${HACK_MONGO_USER}:${HACK_MONGO_PASS}@hack-lobby.awhads9.mongodb.net/`
+    )
+    .then(() => console.log("Connected!"));
+};
 
+export async function getServerSideProps({ req }: { req: NextApiRequest }) {
+  await mongoConnect();
+  const session = await Session.findOne({ token: req.cookies.hackToken });
+  const userId = session?.userId;
   const [
     {
       data: { users, lobbyName },
@@ -257,6 +269,7 @@ export async function getServerSideProps({ req }: { req: NextApiRequest }) {
   ] = await Promise.all([
     load<UsersResponse>({ endpoint: "/lobby" }),
     load<RepoResponse>({ endpoint: "/repo" }),
+    // TODO: Нужно ходит за юзером на прямую в БД вместо удаленого ендпойнта
     userId
       ? load<User>({ endpoint: `/user/${userId}` })
       : Promise.resolve(null),
@@ -267,7 +280,15 @@ export async function getServerSideProps({ req }: { req: NextApiRequest }) {
   );
   const userNickname = isUserInRoom ? req.cookies.nickname : null;
 
-  return { props: { userNickname, users, url, lobbyName, user } };
+  return {
+    props: {
+      userNickname,
+      users,
+      url,
+      lobbyName,
+      user: user ? JSON.stringify(user) : null,
+    },
+  };
 }
 
 export default Home;
